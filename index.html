@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mina, төрсөн өдрийн мэнд</title>
+<meta name="color-scheme" content="dark">
+<style>
+:root{color-scheme:dark;--wine:#5a0f1e;--deep:#2a0610;--rose:#e0566f;--paper:#f6ead9;--ink:#3b1c20;--gold:#ffd98a;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(ellipse at 50% 25%,#9c2a42,var(--wine) 55%,var(--deep));color:var(--paper);font-family:Georgia,"Times New Roman",serif;overflow:hidden}
+canvas{position:fixed;inset:0;pointer-events:none}
+#bg{z-index:0}#cv{z-index:9}
+.scr{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:16px;opacity:0;pointer-events:none;transition:opacity .9s}
+.scr.on{opacity:1;pointer-events:auto}
+h1{font-weight:400;font-style:italic;font-size:clamp(22px,6vw,30px);margin:0;text-align:center}
+.hint{font-size:13px;opacity:0;transition:opacity .6s;color:var(--gold);text-align:center;min-height:18px;margin:0}
+.hint.on{opacity:.9}
+
+.pol{background:#fff;padding:10px 10px 34px;width:min(46vw,190px);transform:rotate(-3deg);box-shadow:0 12px 30px #0007;cursor:pointer;position:relative;animation:fl 5s ease-in-out infinite}
+@keyframes fl{50%{transform:rotate(-1.5deg) translateY(-6px)}}
+.ph{aspect-ratio:1;background:linear-gradient(135deg,#e9c9c2,#d99aa6);display:flex;align-items:center;justify-content:center;color:#7a3a46;font-size:13px;text-align:center;padding:8px;background-size:cover;background-position:center}
+.pol small{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:var(--ink);font-style:italic;font-size:14px}
+.slots{display:flex;gap:6px;align-items:center;font-size:22px;min-height:32px}
+.slots span{width:20px;text-align:center;border-bottom:2px solid var(--gold);height:30px;line-height:30px}
+.slots i{font-style:normal;color:var(--gold)}
+.pad{display:grid;grid-template-columns:repeat(3,60px);gap:8px}
+.pad button{height:50px;border-radius:50%;border:1.5px solid #ffd98a88;background:#ffffff14;color:var(--paper);font:20px Georgia,serif;cursor:pointer;transition:background .15s,transform .15s}
+.pad button:active{background:#ffffff45;transform:scale(.92)}
+button:focus-visible,[role=button]:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.shake{animation:sh .4s}
+@keyframes sh{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+#boom{font-size:clamp(36px,12vw,64px);color:var(--gold);letter-spacing:4px;text-shadow:0 0 22px #ffd98a;min-height:1.2em}
+#sub{font-style:italic;font-size:18px;opacity:0;transition:opacity 1s}
+
+.env{width:min(70vw,280px);aspect-ratio:1.5;background:#e8cdb0;position:relative;box-shadow:0 14px 34px #0008;cursor:pointer;border-radius:4px;animation:fl 4s ease-in-out infinite}
+.env:before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom right,transparent 49.5%,#d6b48f 50%) left/50% 100% no-repeat,linear-gradient(to bottom left,transparent 49.5%,#d6b48f 50%) right/50% 100% no-repeat}
+.env:after{content:"";position:absolute;left:0;right:0;top:0;height:60%;background:#f0d9bf;clip-path:polygon(0 0,100% 0,50% 100%)}
+.env b{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-30%);width:44px;height:44px;border-radius:50%;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 3px 8px #0006}
+
+.letter{background:var(--paper);color:var(--ink);width:min(92vw,440px);padding:24px 22px 18px;box-shadow:0 14px 34px #0008;transform:rotate(.5deg);max-height:78vh;overflow:auto}
+.letter h2{margin:0 0 10px;font-style:italic;font-weight:400;font-size:26px}
+.letter p{margin:0 0 10px;line-height:1.55;font-size:16px}
+.rv{opacity:0;transform:translateY(8px);transition:opacity .9s,transform .9s}
+.rv.in{opacity:1;transform:none}
+.frs{display:flex;gap:10px;margin:10px 0}
+.fr{flex:1;background:#fff;padding:6px 6px 12px;box-shadow:0 4px 10px #0003;cursor:pointer}
+.fr:nth-child(1){transform:rotate(-2deg)}.fr:nth-child(2){transform:rotate(2deg)}
+.fr .ph{font-size:11px}
+.btn{background:var(--gold);color:var(--wine);border:0;border-radius:24px;padding:12px 28px;font:italic 18px Georgia,serif;cursor:pointer;box-shadow:0 6px 18px #0005}
+.btn[hidden]{display:none}
+
+#cake{position:relative;width:200px;height:170px;margin-top:20px}
+.tier{position:absolute;left:50%;transform:translateX(-50%);border-radius:10px 10px 6px 6px}
+.t1{bottom:0;width:200px;height:64px;background:#f3c4cb}
+.t2{bottom:64px;width:132px;height:52px;background:#fbe3e6}
+.t1:before,.t2:before{content:"";position:absolute;left:0;right:0;top:0;height:14px;background:#fff;border-radius:10px 10px 50% 50%/10px 10px 14px 14px}
+.t1:after{content:"♥  ♥  ♥  ♥";position:absolute;left:0;right:0;bottom:12px;text-align:center;color:var(--rose);font-size:14px;letter-spacing:6px}
+.can{position:absolute;bottom:116px;width:8px;height:30px;background:repeating-linear-gradient(#ffd98a 0 6px,#e0566f 6px 12px);border-radius:2px}
+.fl{position:absolute;bottom:146px;width:10px;height:16px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(#fff,#ffb84a 60%,#ff6a2a);box-shadow:0 0 14px 4px #ffb84a99;transition:opacity .6s,transform .6s;transform-origin:bottom;animation:fk .25s infinite alternate}
+@keyframes fk{to{transform:scale(.88,1.08) rotate(3deg)}}
+.out{opacity:0;animation:none}
+#wish{opacity:0;transition:opacity 1.2s;text-align:center;font-style:italic;font-size:clamp(24px,7vw,32px);color:var(--gold);text-shadow:0 0 16px #ffd98a88}
+
+.cards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.card{width:min(28vw,120px);aspect-ratio:.72;perspective:600px;cursor:pointer;background:none;border:0;padding:0;font:inherit;color:inherit}
+.card>div{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;transition:transform .7s;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px}
+.card{position:relative}
+.cf{background:linear-gradient(160deg,#e0566f,#a02a40);font-size:34px;box-shadow:0 8px 20px #0006}
+.cb{background:var(--paper);color:var(--ink);font-size:12.5px;line-height:1.4;font-style:italic;transform:rotateY(180deg)}
+.card.f .cf{transform:rotateY(180deg)}.card.f .cb{transform:rotateY(360deg)}
+#mute{position:fixed;z-index:10;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);background:#ffffff1c;border:1px solid #ffd98a66;color:var(--paper);border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;display:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas><canvas id="cv"></canvas>
+<input type="file" accept="image/*" id="file" hidden>
+<button id="mute" type="button" aria-label="Дуу асаах/унтраах">🔊</button>
+
+<section class="scr on" id="s1">
+ <div class="pol ph-t" id="p0" role="button" tabindex="0" aria-label="Зураг сонгох"><div class="ph">Зураг нэмэх бол товш</div><small>Mina ♡</small></div>
+ <h1>Нууц кодыг оруул</h1>
+ <div class="slots" id="slots"></div>
+ <div class="pad" id="pad"></div>
+ <p class="hint" id="hint">Бидний чухал өдөр: он, сар, өдөр (8 орон)</p>
+</section>
+
+<section class="scr" id="s2"><div id="boom"></div><div id="sub">Нууц нээгдлээ ✨</div></section>
+
+<section class="scr" id="s3">
+ <div class="env" id="env" role="button" tabindex="0" aria-label="Захиаг нээх"><b>♥</b></div>
+ <p class="hint on" id="envh">Захиаг нээхийн тулд товш</p>
+ <div class="letter" id="letter" hidden>
+  <h2 class="rv">Mina,</h2>
+  <p class="rv">happy birthday to my favorite girlieeeee💗🎀&#129697; </td>
+
+       Төрсөн өдрийн мэнд хүргэе, миний хайртай найзаа. Бид хоёр найзлаад дөнгөж 3 жил болж байгаа ч чамтай танилцсандаа үнэхээр их баярладаг шүү. ❤️&#129401; Чи минь үргэлж өөрийнхөөрөө байж, хүссэн бүхэндээ хүрээд, ирээдүйд хамгийн мундаг дизайнер болоорой. Нэг өдөр чиний хийсэн хувцаснуудыг хараад “THAT’S MY BEST FRIEND” гээд бахархаад зогсож байх өдөр ирнэ гэдэгт итгэдэг шүү. ❤️&#129401; Чи минь өөрийн хүсэл мөрөөдлөө хэзээ ч битгий орхиорой, чи чадна аа. Чиний мөрөөдөл биелж, өөрийн гэсэн брэндтэй болоод, хийх дуртай зүйлээ хийж, аз жаргалтай байхыг чинь харахыг үнэхээр их хүсдэг.</p>
+  <div class="frs rv" style="display: flex; gap: 16px; justify-content: center; margin: 15px 0;">
+    <img src="./zurg.jpeg" width="151" height="200">
+    <img src="./zurg1.jpeg" width="118" height="200">
+   <div></div>
+  </div>
+  <p class="rv">Энэ 3 жилийн хугацаанд надтай хамт байсанд баярлалаа. Цаашдаа ч олон жил найзалж, хамт инээж, гоё дурсамжууд бүтээж, нэг нэгнийхээ амжилтад үргэлж баярлаж явцгаая. 💋💗 Чи минь үргэлж аз жаргалтай, хайраар дүүрэн байж, хүсэл бүхэн чинь биелэх болтугай. Миний ирээдүйн мундаг хувцас дизайнер үнсүүү 🪡🎀💗
+
+HAPPY BIRTHDAYYYY, MY GIRL 🫰🏼🫰🏼💗</p>
+  <p class="rv" style="text-align:right;font-style:italic;margin:0">— Энэбиш-ээс</p>
+ </div>
+ <button class="btn" id="go" hidden>Бялуу руу</button>
+</section>
+
+<section class="scr" id="s4">
+ <div id="wish">Happy Birthday, Mina!</div>
+ <div id="cake"><div class="tier t1"></div><div class="tier t2"></div></div>
+ <p class="hint on" id="bh">Хүслээ бодоод лаагаа үлээ 🕯️</p>
+ <button class="btn" id="blow">Happy Birthday🎂 </button>
+ <button class="btn" id="gift" hidden>Нэг зүйл үзээрэй 🎁</button>
+</section>
+
+<section class="scr" id="s5">
+ <h1>Чамд зориулсан 3 зүрх</h1>
+ <div class="cards">
+  <button class="card" type="button"><div class="cf">♥</div><div class="cb">Бага сөжү уугаарай&#127862;.</div></button>
+  <button class="card" type="button"><div class="cf">♥</div><div class="cb">30мин хөлөө бариулах эрх хожлоо.&#129462;&#128134;</div></button>
+  <button class="card" type="button"><div class="cf">♥</div><div class="cb">Миний хуримын даашинжыг хийж өгөхөө мартваа.&#128087;&#129697;</div></button>
+ </div>
+ <button class="btn" id="again">Дахин үзэх</button>
+</section>
+
+<script>
+(function(){
+"use strict";
+var CODES=["20081124",],buf="",tries=0;
+var $=function(i){return document.getElementById(i)};
+var slots=$("slots"),pad=$("pad");
+var calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+function drawSlots(){
+ var h="";
+ for(var i=0;i<8;i++){h+="<span>"+(buf[i]?"•":"")+"</span>";if(i==3||i==5)h+="<i>:</i>"}
+ slots.innerHTML=h;
+}
+drawSlots();
+["1","2","3","4","5","6","7","8","9","⌫","0","✓"].forEach(function(k){
+ var b=document.createElement("button");b.textContent=k;b.type="button";b.setAttribute("aria-label",k);
+ b.onclick=function(){press(k)};pad.appendChild(b);
+});
+document.addEventListener("keydown",function(e){
+ if(!$("s1").classList.contains("on"))return;
+ if(/^\d$/.test(e.key))press(e.key);
+ else if(e.key==="Backspace")press("⌫");
+ else if(e.key==="Enter")press("✓");
+});
+function press(k){
+ if(k==="⌫")buf=buf.slice(0,-1);
+ else if(k==="✓"){check();return}
+ else if(buf.length<8)buf+=k;
+ drawSlots();
+ if(buf.length===8)check();
+}
+function check(){
+ if(CODES.indexOf(buf)>-1){unlock();return}
+ tries++;if(tries>=2)$("hint").classList.add("on");
+ slots.classList.remove("shake");void slots.offsetWidth;slots.classList.add("shake");
+ if(navigator.vibrate)navigator.vibrate(60);
+ buf="";setTimeout(drawSlots,350);
+}
+function show(id){
+ document.querySelectorAll(".scr").forEach(function(s){s.classList.remove("on")});
+ $(id).classList.add("on");
+}
+
+function unlock(){
+ show("s2");
+ var txt="2008:11:24",i=0,el=$("boom");el.textContent="";
+ var t=setInterval(function(){
+  el.textContent+=txt[i++];
+  if(i>=txt.length){clearInterval(t);$("sub").style.opacity=1}
+ },160);
+ burst(innerWidth/2,innerHeight/2,100);
+ setTimeout(function(){burst(innerWidth/2,innerHeight/2,70)},1300);
+ setTimeout(function(){show("s3")},3600);
+}
+
+var target=null;
+function choose(el){target=el;$("file").value="";$("file").click()}
+$("file").onchange=function(e){
+ var f=e.target.files[0];if(!f||!target)return;
+ var ph=target.querySelector(".ph"),r=new FileReader();
+ r.onload=function(){ph.style.backgroundImage="url("+r.result+")";ph.textContent=""};
+ r.readAsDataURL(f);
+};
+document.querySelectorAll(".ph-t").forEach(function(el){
+ el.onclick=function(){choose(el)};
+ el.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();choose(el)}};
+});
+
+function openEnv(){
+ $("env").style.display="none";$("envh").style.display="none";
+ $("letter").hidden=false;
+ burst(innerWidth/2,innerHeight*.4,40);
+ var rv=document.querySelectorAll(".rv");
+ rv.forEach(function(el,i){setTimeout(function(){el.classList.add("in")},300+i*900)});
+ setTimeout(function(){$("go").hidden=false},300+rv.length*900);
+}
+$("env").onclick=openEnv;
+$("env").onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();openEnv()}};
+
+var cake=$("cake"),flames=[],out=false;
+[-60,-20,20,60].forEach(function(x){
+ var c=document.createElement("div");c.className="can";c.style.left="calc(50% + "+(x-4)+"px)";cake.appendChild(c);
+ var f=document.createElement("div");f.className="fl";f.style.left="calc(50% + "+(x-4)+"px)";cake.appendChild(f);flames.push(f);
+});
+$("go").onclick=function(){show("s4");song()};
+function blowOut(){
+ if(out)return;out=true;
+ flames.forEach(function(f,i){setTimeout(function(){f.classList.add("out")},i*220)});
+ $("blow").style.display="none";$("bh").style.display="none";
+ setTimeout(function(){
+  $("wish").style.opacity=1;
+  for(var i=0;i<6;i++)setTimeout(function(){burst(Math.random()*innerWidth,innerHeight*.35,60)},i*350);
+  setTimeout(function(){$("gift").hidden=false},2200);
+ },1000);
+}
+$("blow").onclick=function(){
+ var btn=$("blow");btn.disabled=true;
+ var fallback=setTimeout(blowOut,9000);
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){clearTimeout(fallback);blowOut();return}
+ navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
+  $("bh").textContent="Микрофон руу үлээгээрэй 💨";
+  var A=new(window.AudioContext||window.webkitAudioContext)(),src=A.createMediaStreamSource(st),an=A.createAnalyser();
+  an.fftSize=512;src.connect(an);var d=new Uint8Array(an.fftSize),hits=0;
+  (function loop(){
+   if(out){st.getTracks().forEach(function(t){t.stop()});return}
+   an.getByteTimeDomainData(d);var m=0;
+   for(var i=0;i<d.length;i++)m=Math.max(m,Math.abs(d[i]-128));
+   hits=m>50?hits+1:Math.max(0,hits-1);
+   flames.forEach(function(f){f.style.transform=m>35?"scaleY(.6) skewX(8deg)":""});
+   if(hits>10){clearTimeout(fallback);blowOut()}
+   requestAnimationFrame(loop);
+  })();
+ }).catch(function(){clearTimeout(fallback);blowOut()});
+};
+$("gift").onclick=function(){show("s5")};
+
+var cs=document.querySelectorAll(".card"),flipped=0;
+cs.forEach(function(c){c.onclick=function(){
+ if(c.classList.contains("f"))return;
+ c.classList.add("f");flipped++;
+ var r=c.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,30);
+ if(flipped===3)$("fh").textContent="Чамд хайртай ♥";
+}});
+$("again").onclick=function(){
+ location.reload();
+};
+
+var AC=null,muted=false,master=null;
+function song(){
+ try{
+  AC=new(window.AudioContext||window.webkitAudioContext)();
+  master=AC.createGain();master.gain.value=1;master.connect(AC.destination);
+  var t=AC.currentTime+.2,beat=.46;
+  var N=[[392,.75],[392,.25],[440,1],[392,1],[523,1],[494,2],[392,.75],[392,.25],[440,1],[392,1],[587,1],[523,2],
+         [392,.75],[392,.25],[784,1],[659,1],[523,1],[494,1],[440,2],[698,.75],[698,.25],[659,1],[523,1],[587,1],[523,2]];
+  N.forEach(function(n){
+   var d=n[1]*beat;
+   [[n[0],"triangle",.16],[n[0]/2,"sine",.07]].forEach(function(v){
+    var o=AC.createOscillator(),g=AC.createGain();
+    o.type=v[1];o.frequency.value=v[0];o.connect(g);g.connect(master);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v[2],t+.03);
+    g.gain.exponentialRampToValueAtTime(.001,t+d-.02);
+    o.start(t);o.stop(t+d);
+   });
+   t+=d;
+  });
+  $("mute").style.display="block";
+ }catch(e){}
+}
+$("mute").onclick=function(){
+ muted=!muted;if(master)master.gain.value=muted?0:1;$("mute").textContent=muted?"🔇":"🔊";
+};
+
+var bg=$("bg"),bx=bg.getContext("2d"),cv=$("cv"),cx=cv.getContext("2d"),H=[],P=[],run=false;
+function size(){bg.width=cv.width=innerWidth;bg.height=cv.height=innerHeight}
+size();addEventListener("resize",size);
+for(var i=0;i<30;i++){var r=Math.random();H.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,s:8+r*20,v:.25+r*.6,p:r*6,a:.08+r*.2})}
+var T=0;
+(function hearts(){
+ bx.clearRect(0,0,bg.width,bg.height);bx.fillStyle="#ff8fa3";T+=.02;
+ H.forEach(function(h){
+  if(!calm){h.y-=h.v;h.x+=Math.sin(T+h.p)*.4}
+  if(h.y<-30){h.y=bg.height+30;h.x=Math.random()*bg.width}
+  bx.globalAlpha=h.a;bx.font=h.s+"px Georgia";bx.fillText("♥",h.x,h.y);
+ });
+ requestAnimationFrame(hearts);
+})();
+
+function burst(x,y,n){
+ var col=["#ffd98a","#ff8fa3","#fff","#ffb84a","#f6ead9"];
+ for(var i=0;i<n;i++){var a=Math.random()*6.283,s=2+Math.random()*6;
+  P.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,r:2+Math.random()*3,c:col[i%5],l:1})}
+ if(!run){run=true;requestAnimationFrame(tick)}
+}
+function tick(){
+ cx.clearRect(0,0,cv.width,cv.height);
+ P=P.filter(function(p){return p.l>0});
+ P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.vx*=.99;p.l-=.011;
+  cx.globalAlpha=Math.max(p.l,0);cx.fillStyle=p.c;cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.283);cx.fill()});
+ if(P.length)requestAnimationFrame(tick);else{run=false;cx.clearRect(0,0,cv.width,cv.height)}
+}
+})();
+</script>
+</body>
+</html>
